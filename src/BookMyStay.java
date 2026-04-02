@@ -1,63 +1,44 @@
 import java.util.*;
-
 public class BookMyStay {
     public static void main(String args[]) {
-        System.out.println("Add-On Service Selection");
-        RoomAllocationService allocationService = new RoomAllocationService();
-        AddOnServiceManager serviceManager = new AddOnServiceManager();
-        String resId = "Single-1";
-        Service breakfast = new Service("Breakfast", 500.0);
-        Service spa = new Service("Spa", 1000.0);
-        serviceManager.addService(resId, breakfast);
-        serviceManager.addService(resId, spa);
-        System.out.println("Reservation ID: " + resId);
-        double totalCost = serviceManager.calculateTotalServiceCost(resId);
-        System.out.println("Total Add-On Cost: " + totalCost);
+        System.out.println("Booking History and Reporting");
+        BookingHistory history = new BookingHistory();
+        BookingReportService reportService = new BookingReportService();
+        history.addReservation(new Reservation("Abhi", "Single"));
+        history.addReservation(new Reservation("Subha", "Double"));
+        history.addReservation(new Reservation("Vanmathi", "Suite"));
+        reportService.generateReport(history);
     }
 }
-class Service {
-    private String serviceName;
-    private double cost;
-
-    public Service(String serviceName, double cost) {
-        this.serviceName = serviceName;
-        this.cost = cost;
+class BookingHistory {
+    private List<Reservation> confirmedReservations;
+    public BookingHistory() {
+        confirmedReservations = new ArrayList<>();
     }
-
-    public String getServiceName() { return serviceName; }
-    public double getCost() { return cost; }
+    public void addReservation(Reservation reservation) {
+        confirmedReservations.add(reservation);
+    }
+    public List<Reservation> getConfirmedReservations() {
+        return confirmedReservations;
+    }
 }
-
-class AddOnServiceManager {
-    private Map<String, List<Service>> servicesByReservation;
-
-    public AddOnServiceManager() {
-        servicesByReservation = new HashMap<>();
-    }
-
-    public void addService(String reservationId, Service service) {
-        // computeIfAbsent handles the creation of the ArrayList automatically
-        servicesByReservation.computeIfAbsent(reservationId, k -> new ArrayList<>()).add(service);
-    }
-
-    public double calculateTotalServiceCost(String reservationId) {
-        List<Service> services = servicesByReservation.get(reservationId);
-        if (services == null) return 0.0;
-
-        double total = 0;
-        for (Service s : services) {
-            total += s.getCost();
+class BookingReportService {
+    public void generateReport(BookingHistory history) {
+        System.out.println("Booking History Report");
+        List<Reservation> records = history.getConfirmedReservations();
+        for (Reservation res : records) {
+            System.out.println("Guest: " + res.getGuestName() +
+                    ", Room Type: " + res.getRoomType());
         }
-        return total;
     }
 }
-
-class RoomAllocationService {
-    private Set<String> allocatedRoomIds;
-    private Map<String, Set<String>> assignedRoomsByType;
-
-    public RoomAllocationService() {
-        allocatedRoomIds = new HashSet<>();
-        assignedRoomsByType = new HashMap<>();
+class Reservation {
+    private String guestName;
+    private String roomType;
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
+    public String getGuestName() { return guestName; }
+    public String getRoomType() { return roomType; }
 }
