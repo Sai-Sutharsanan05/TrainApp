@@ -1,57 +1,63 @@
 import java.util.*;
-public class BookMyStay{
+
+public class BookMyStay {
     public static void main(String args[]) {
-        System.out.println("Room Allocation Processing");
-        BookingRequestQueue requestQueue = new BookingRequestQueue();
+        System.out.println("Add-On Service Selection");
         RoomAllocationService allocationService = new RoomAllocationService();
-        RoomInventory inventory = new RoomInventory();
-        requestQueue.addRequest(new Reservation("Abhi", "Single"));
-        requestQueue.addRequest(new Reservation("Subha", "Single"));
-        requestQueue.addRequest(new Reservation("Vanmathi", "Suite"));
-        while (requestQueue.hasPendingRequests()) {
-            Reservation res = requestQueue.processNextRequest();
-            allocationService.allocateRoom(res, inventory);
-        }
+        AddOnServiceManager serviceManager = new AddOnServiceManager();
+        String resId = "Single-1";
+        Service breakfast = new Service("Breakfast", 500.0);
+        Service spa = new Service("Spa", 1000.0);
+        serviceManager.addService(resId, breakfast);
+        serviceManager.addService(resId, spa);
+        System.out.println("Reservation ID: " + resId);
+        double totalCost = serviceManager.calculateTotalServiceCost(resId);
+        System.out.println("Total Add-On Cost: " + totalCost);
     }
 }
+class Service {
+    private String serviceName;
+    private double cost;
+
+    public Service(String serviceName, double cost) {
+        this.serviceName = serviceName;
+        this.cost = cost;
+    }
+
+    public String getServiceName() { return serviceName; }
+    public double getCost() { return cost; }
+}
+
+class AddOnServiceManager {
+    private Map<String, List<Service>> servicesByReservation;
+
+    public AddOnServiceManager() {
+        servicesByReservation = new HashMap<>();
+    }
+
+    public void addService(String reservationId, Service service) {
+        // computeIfAbsent handles the creation of the ArrayList automatically
+        servicesByReservation.computeIfAbsent(reservationId, k -> new ArrayList<>()).add(service);
+    }
+
+    public double calculateTotalServiceCost(String reservationId) {
+        List<Service> services = servicesByReservation.get(reservationId);
+        if (services == null) return 0.0;
+
+        double total = 0;
+        for (Service s : services) {
+            total += s.getCost();
+        }
+        return total;
+    }
+}
+
 class RoomAllocationService {
     private Set<String> allocatedRoomIds;
     private Map<String, Set<String>> assignedRoomsByType;
+
     public RoomAllocationService() {
         allocatedRoomIds = new HashSet<>();
         assignedRoomsByType = new HashMap<>();
-    }
-    public void allocateRoom(Reservation reservation, RoomInventory inventory) {
-        String roomType = reservation.getRoomType();
-        String roomId = generateRoomId(roomType);
-        allocatedRoomIds.add(roomId);
-        assignedRoomsByType.computeIfAbsent(roomType, k -> new HashSet<>()).add(roomId);
-        inventory.decrementInventory(roomType);
-        System.out.println("Booking confirmed for Guest: " + reservation.getGuestName() +
-                ", Room ID: " + roomId);
-    }
-    private String generateRoomId(String roomType) {
-        int count = assignedRoomsByType.getOrDefault(roomType, new HashSet<>()).size() + 1;
-        return roomType + "-" + count;
-    }
-}
-class Reservation {
-    private String guestName;
-    private String roomType;
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-    }
-    public String getGuestName() { return guestName; }
-    public String getRoomType() { return roomType; }
-}
-class BookingRequestQueue {
-    private Queue<Reservation> queue = new LinkedList<>();
-    public void addRequest(Reservation r) { queue.offer(r); }
-    public Reservation processNextRequest() { return queue.poll(); }
-    public boolean hasPendingRequests() { return !queue.isEmpty(); }
-}
-class RoomInventory {
-    public void decrementInventory(String roomType) {
     }
 }
