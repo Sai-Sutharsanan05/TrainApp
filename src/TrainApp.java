@@ -1,5 +1,5 @@
 import java.util.LinkedList;
-public class UseCase4TrainConsistApp {
+public class TrainApp {
     public static void main(String[] args) {
         System.out.println("====================================");
         System.out.println(" UC4: Maintain Ordered Bogie IDs ");
